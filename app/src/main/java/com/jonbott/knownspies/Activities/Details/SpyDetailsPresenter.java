@@ -4,12 +4,17 @@ import android.content.Context;
 
 import com.jonbott.knownspies.Helpers.Helper;
 import com.jonbott.knownspies.ModelLayer.Database.Realm.Spy;
+import com.jonbott.knownspies.ModelLayer.ModelLayer;
 
 import io.realm.Realm;
 
 class SpyDetailsPresenter {
 
-    private Realm realm = Realm.getDefaultInstance();
+//    private Realm realm = Realm.getDefaultInstance();
+
+    private ModelLayer modelLayer = new ModelLayer();
+
+    Spy spy;
 
     public int spyId;
     public String age;
@@ -23,18 +28,22 @@ class SpyDetailsPresenter {
     public SpyDetailsPresenter(int spyId) {
         this.spyId = spyId;
 
-        Spy spy = getSpy(spyId);
+        spy = modelLayer.spyForId(spyId);
+        configureSpy(spy);
+
+    }
+
+    private void configureSpy(Spy spy) {
         age = String.valueOf(spy.age);
         name = spy.name;
         gender = spy.gender;
         imageName = spy.imageName;
-
     }
 
-    private Spy getSpy(int spyId) {
-        Spy tempSpy = realm.where(Spy.class).equalTo("id", spyId).findFirst();
-        return realm.copyFromRealm(tempSpy);
-    }
+//    private Spy getSpy(int spyId) {
+//        Spy tempSpy = realm.where(Spy.class).equalTo("id", spyId).findFirst();
+//        return realm.copyFromRealm(tempSpy);
+//    }
 
     public void configureWithContext(Context context) {
         this.context = context;
