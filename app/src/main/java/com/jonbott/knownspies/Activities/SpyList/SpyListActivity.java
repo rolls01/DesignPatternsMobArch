@@ -37,7 +37,7 @@ public class SpyListActivity extends AppCompatActivity {
     private static final String TAG = "SpyListActivity";
 
     private SpyListPresenter spyListPresenter = new SpyListPresenter();
-    private List<Spy> spies = new ArrayList<>();
+    private List<SpyDTO> spies = new ArrayList<>();
     private RecyclerView recyclerView;
 
     @Override
@@ -76,14 +76,9 @@ public class SpyListActivity extends AppCompatActivity {
 
     private void loadData() {
         spyListPresenter.loadData( spies -> {
-            Log.d("loadDataSpies", spies.size()+"");
-            Log.d("loadDataSpies this before", this.spies.size()+"");
             this.spies = spies;
-            Log.d("loadDataSpies this after", this.spies.size()+"");
             SpyViewAdapter adapter = (SpyViewAdapter) recyclerView.getAdapter();
             adapter.setSpies(this.spies);
-            Log.d("adapter.spies", adapter.spies == null? "null":"Not null");
-            Log.d("SpyViewAdapter", adapter.getItemCount()+"");
             adapter.notifyDataSetChanged();
         }, this::notifyDataReceived);
     }
@@ -105,7 +100,7 @@ public class SpyListActivity extends AppCompatActivity {
     //region User Interaction
 
     private void rowTapped(int position) {
-        Spy spy = spies.get(position);
+        SpyDTO spy = spies.get(position);
         gotoSpyDetails(spy.id);
     }
 

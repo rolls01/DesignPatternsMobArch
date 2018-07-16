@@ -8,6 +8,7 @@ import com.jonbott.knownspies.ModelLayer.Database.DataLayer;
 import com.jonbott.knownspies.ModelLayer.Database.Realm.Spy;
 import com.jonbott.knownspies.ModelLayer.Enums.Source;
 import com.jonbott.knownspies.ModelLayer.Network.NetworkLayer;
+import com.jonbott.knownspies.ModelLayer.Translation.SpyTranslator;
 import com.jonbott.knownspies.ModelLayer.Translation.TranslationLayer;
 
 import java.util.List;
@@ -21,12 +22,13 @@ public class ModelLayer {
     private static final String TAG = "ModelLayer";
     private NetworkLayer networkLayer = new NetworkLayer();
     private DataLayer dataLayer = new DataLayer();
-    private Realm realm = Realm.getDefaultInstance();
+//    private Realm realm = Realm.getDefaultInstance();
     private TranslationLayer translationLayer = new TranslationLayer();
 
-    public void loadData(Consumer<List<Spy>> onNewResults, Consumer<Source> notifyDataReceiver) {
+    public void loadData(Consumer<List<SpyDTO>> onNewResults, Consumer<Source> notifyDataReceiver) {
+        SpyTranslator spyTranslator = translationLayer.translatorFor(SpyDTO.dtoType);
         try{
-            dataLayer.loadSpiesFromLocal(onNewResults);
+            dataLayer.loadSpiesFromLocal(spyTranslator::translate, onNewResults);
             notifyDataReceiver.accept(Source.local);
         }catch (Exception e){
             e.printStackTrace();
@@ -34,12 +36,25 @@ public class ModelLayer {
 
         networkLayer.loadJson(json ->{
             notifyDataReceiver.accept(Source.network);
-            persistJson(json, ()->dataLayer.loadSpiesFromLocal(onNewResults));
+            persistJson(json, ()->dataLayer.loadSpiesFromLocal(spyTranslator::translate, onNewResults));
         });
     }
 
     private void persistJson(String json, Action finished) {
-        translationLayer.convertJson(json);
+        List<SpyDTO> spyDTOS = translationLayer.convertJson(json);
+
+        Threading.async(() ->{
+           dataLayer.clearSpies(() -> {
+               spyDTOS.forEach(dto -> dto.initialize());
+
+                   SpyTranslator spyTranslator = translationLayer.translatorFor(SpyDTO.dtoType);
+                    dataLayer.persistDTOs(spyDTOS, spyTranslator::translate);
+
+                    Threading.dispatchMain(() -> finished.run());
+
+           });
+            return true;
+        });
 
 //        Threading.async(() -> {
 //
@@ -73,8 +88,14 @@ public class ModelLayer {
 //        dtos.forEach(dto -> spyTranslator.translate(dto, backgroundRealm));
     }
 
-    public Spy spyForId(int spyId) {
-        Spy tempSpy = realm.where(Spy.class).equalTo("id", spyId).findFirst();
-        return realm.copyFromRealm(tempSpy);
+//    public Spy spyForId(int spyId) {
+//        Spy tempSpy = realm.where(Spy.class).equalTo("id", spyId).findFirst();
+//        Log.d("tempSpy", tempSpy == null ? "null": tempSpy.name);
+//        return realm.copyFromRealm(tempSpy);
+//    }
+    public SpyDTO spyForId(int spyId){
+        Spy spy = dataLayer.spyForId(spyId);
+        SpyDTO spyDTO = translationLayer.translate(spy);
+        return spyDTO;
     }
 }

@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.jonbott.knownspies.Helpers.Helper;
+import com.jonbott.knownspies.ModelLayer.DTOs.SpyDTO;
 import com.jonbott.knownspies.ModelLayer.Database.Realm.Spy;
 import com.jonbott.knownspies.R;
 
@@ -32,7 +33,7 @@ public class SpyViewHolder extends RecyclerView.ViewHolder {
         this.personPhoto = (ImageView) itemView.findViewById(R.id.person_photo);
     }
 
-    public void configureWith(Spy spy) {
+    public void configureWith(SpyDTO spy) {
         int imageId = Helper.resourceIdWith(context, spy.imageName);
         String age = String.valueOf(spy.age);
 

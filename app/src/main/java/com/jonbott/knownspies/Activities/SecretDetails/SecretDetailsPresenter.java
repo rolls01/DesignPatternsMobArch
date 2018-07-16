@@ -3,6 +3,7 @@ package com.jonbott.knownspies.Activities.SecretDetails;
 import android.view.View;
 
 import com.jonbott.knownspies.Helpers.Threading;
+import com.jonbott.knownspies.ModelLayer.DTOs.SpyDTO;
 import com.jonbott.knownspies.ModelLayer.Database.Realm.Spy;
 import com.jonbott.knownspies.ModelLayer.ModelLayer;
 
@@ -16,7 +17,7 @@ class SecretDetailsPresenter {
 
     ModelLayer modelLayer = new ModelLayer();
 
-    private Spy spy;
+    private SpyDTO spy;
     public String password;
 
     SecretDetailsPresenter(int spyId){

@@ -3,6 +3,7 @@ package com.jonbott.knownspies.Activities.Details;
 import android.content.Context;
 
 import com.jonbott.knownspies.Helpers.Helper;
+import com.jonbott.knownspies.ModelLayer.DTOs.SpyDTO;
 import com.jonbott.knownspies.ModelLayer.Database.Realm.Spy;
 import com.jonbott.knownspies.ModelLayer.ModelLayer;
 
@@ -14,7 +15,7 @@ class SpyDetailsPresenter {
 
     private ModelLayer modelLayer = new ModelLayer();
 
-    Spy spy;
+    SpyDTO spy;
 
     public int spyId;
     public String age;
@@ -33,10 +34,10 @@ class SpyDetailsPresenter {
 
     }
 
-    private void configureSpy(Spy spy) {
+    private void configureSpy(SpyDTO spy) {
         age = String.valueOf(spy.age);
         name = spy.name;
-        gender = spy.gender;
+        gender = spy.gender.name();
         imageName = spy.imageName;
     }
 

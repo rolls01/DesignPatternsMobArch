@@ -10,6 +10,8 @@ import com.jonbott.knownspies.ModelLayer.Enums.DTOType;
 
 import java.util.List;
 
+import io.realm.Realm;
+
 public class TranslationLayer {
 
     private static final String TAG = "TranslationLayer";
@@ -17,7 +19,7 @@ public class TranslationLayer {
 
     private SpyTranslator spyTranslator = new SpyTranslator();
 
-    public List<Spy> convertJson(String json) {
+    public List<SpyDTO> convertJson(String json) {
         Log.d(TAG, "converting Json to DTOs");
 
         TypeToken<List<SpyDTO>> token = new TypeToken<List<SpyDTO>>() {
@@ -33,5 +35,15 @@ public class TranslationLayer {
             default:
                 return spyTranslator;
         }
+    }
+
+    public SpyDTO translate(Spy spy){
+        SpyDTO dto = spyTranslator.translate(spy);
+        return dto;
+    }
+
+    public Spy translate(SpyDTO dto, Realm realm){
+        Spy spy = spyTranslator.translate(dto, realm);
+        return spy;
     }
 }
