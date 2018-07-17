@@ -5,6 +5,7 @@ import com.jonbott.knownspies.ModelLayer.Enums.Source;
 
 import java.util.List;
 
+import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 
 public interface ModelLayer {
@@ -16,4 +17,8 @@ public interface ModelLayer {
     //        return realm.copyFromRealm(tempSpy);
     //    }
     SpyDTO spyForId(int spyId);
+
+    SpyDTO spyForName(String name);
+
+    void save(List<SpyDTO> dtos, Action finished);
 }

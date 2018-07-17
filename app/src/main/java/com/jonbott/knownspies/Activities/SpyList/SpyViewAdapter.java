@@ -10,6 +10,7 @@ import com.jonbott.knownspies.ModelLayer.DTOs.SpyDTO;
 import com.jonbott.knownspies.ModelLayer.Database.Realm.Spy;
 import com.jonbott.knownspies.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,14 +19,15 @@ import java.util.List;
 
 public class SpyViewAdapter extends RecyclerView.Adapter<SpyViewHolder> {
 
-    List<SpyDTO> spies;
+    List<SpyDTO> spies = new ArrayList<>();
     CustomItemClickListener listener;
-
 
     public void setSpies(List<SpyDTO> spies) {
         this.spies = spies;
+        notifyDataSetChanged();
     }
-    public SpyViewAdapter(List<SpyDTO> spies, CustomItemClickListener listener) {
+
+    public SpyViewAdapter(CustomItemClickListener listener) {
         this.spies = spies;
         this.listener = listener;
     }
@@ -54,4 +56,5 @@ public class SpyViewAdapter extends RecyclerView.Adapter<SpyViewHolder> {
     public int getItemCount() {
         return spies.size();
     }
+
 }

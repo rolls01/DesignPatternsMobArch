@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -40,7 +41,6 @@ public class SpyListActivity extends AppCompatActivity {
 
     private SpyListPresenter spyListPresenter;
     private RootCoordinator rootCoordinator;
-    private List<SpyDTO> spies = new ArrayList<>();
     private RecyclerView recyclerView;
 
     @Override
@@ -59,6 +59,14 @@ public class SpyListActivity extends AppCompatActivity {
         this.spyListPresenter = spyListPresenter;
         this.rootCoordinator = rootCoordinator;
         loadData();
+        setupObservables();
+    }
+
+    private void setupObservables() {
+        spyListPresenter.spies().subscribe(spies ->{
+            SpyViewAdapter adapter = (SpyViewAdapter) recyclerView.getAdapter();
+            adapter.setSpies(spies);
+        });
     }
     //endregion
 
@@ -66,6 +74,10 @@ public class SpyListActivity extends AppCompatActivity {
     //region Helper Methods
 
     private void attachUI() {
+
+        Button newSpyButton = (Button) findViewById(R.id.new_spy_button);
+        newSpyButton.setOnClickListener(view -> spyListPresenter.addNewSpy());
+
         LinearLayoutManager manager = new LinearLayoutManager(this);
 
         recyclerView = (RecyclerView) findViewById(R.id.spy_recycler_view);
@@ -89,16 +101,8 @@ public class SpyListActivity extends AppCompatActivity {
 
 
     private void loadData() {
-        spyListPresenter.loadData(this::spiesUpdated, this::onDataReceived);
+        spyListPresenter.loadData(this::onDataReceived);
 
-    }
-        private void spiesUpdated(List<SpyDTO> spiesDTO) {
-        spyListPresenter.loadData( spies -> {
-            this.spies = spies;
-            SpyViewAdapter adapter = (SpyViewAdapter) recyclerView.getAdapter();
-            adapter.setSpies(this.spies);
-            adapter.notifyDataSetChanged();
-        }, this::onDataReceived);
     }
 
     //        });
@@ -118,7 +122,7 @@ public class SpyListActivity extends AppCompatActivity {
     //region User Interaction
 
     private void rowTapped(int position) {
-        SpyDTO spy = spies.get(position);
+        SpyDTO spy = spyListPresenter.spies().getValue().get(position);
         gotoSpyDetails(spy.id);
     }
 
@@ -133,7 +137,7 @@ public class SpyListActivity extends AppCompatActivity {
     //region List View Adapter
 
     private void initializeListView() {
-        SpyViewAdapter adapter = new SpyViewAdapter(spies, (v, position) -> rowTapped(position));
+        SpyViewAdapter adapter = new SpyViewAdapter((v, position) -> rowTapped(position));
         recyclerView.setAdapter(adapter);
     }
 

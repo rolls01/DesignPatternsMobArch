@@ -15,6 +15,27 @@ import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 
 public class ModelLayerImpl implements ModelLayer {
+    @Override
+    public SpyDTO spyForName(String name) {
+        Spy spy = dataLayer.spyForName(name);
+        SpyDTO spyDTO = translationLayer.translate(spy);
+        return spyDTO;
+    }
+
+    @Override
+    public void save(List<SpyDTO> dtos, Action finished) {
+        Threading.async(() -> {
+            persistDTOs(dtos, finished);
+            return true;
+        });
+    }
+
+    private void persistDTOs(List<SpyDTO> dtos, Action finished) {
+        SpyTranslator spyTranslator = translationLayer.translatorFor(SpyDTO.dtoType);
+        dataLayer.persistDTOs(dtos, spyTranslator::translate);
+
+        Threading.dispatchMain(() -> finished.run());
+    }
 
     private static final String TAG = "ModelLayer";
     private NetworkLayer networkLayer;// = new NetworkLayer();
@@ -49,53 +70,13 @@ public class ModelLayerImpl implements ModelLayer {
         Threading.async(() ->{
            dataLayer.clearSpies(() -> {
                spyDTOS.forEach(dto -> dto.initialize());
-
-                   SpyTranslator spyTranslator = translationLayer.translatorFor(SpyDTO.dtoType);
-                    dataLayer.persistDTOs(spyDTOS, spyTranslator::translate);
-
-                    Threading.dispatchMain(() -> finished.run());
+                    persistDTOs(spyDTOS, finished);
 
            });
             return true;
         });
-
-//        Threading.async(() -> {
-//
-//            clearSpies(() -> {
-//                List<SpyDTO> dtos = translationLayer.convertJson(json);
-//                dtos.forEach(dto -> dto.initialize());
-//                persistDTOs(dtos);
-//
-//                Threading.dispatchMain(() -> finished.run());
-//            });
-//
-//            return true;
-//        });
-//    }
-
-//    private void clearSpies(Action finished) throws Exception {
-//        Log.d(TAG, "clearing DB");
-//
-//        Realm backgroundRealm = Realm.getInstance(realm.getConfiguration());
-//        backgroundRealm.executeTransaction(r -> r.delete(Spy.class));
-//
-//        finished.run();
-//    }
-//    private void persistDTOs(List<SpyDTO> dtos) {
-//        Log.d(TAG, "persisting dtos to DB");
-//
-//        Realm backgroundRealm = Realm.getInstance(realm.getConfiguration());
-//        backgroundRealm.executeTransaction(r -> r.delete(Spy.class));
-//
-//        //ignore result and just save in realm
-//        dtos.forEach(dto -> spyTranslator.translate(dto, backgroundRealm));
     }
 
-//    public Spy spyForId(int spyId) {
-//        Spy tempSpy = realm.where(Spy.class).equalTo("id", spyId).findFirst();
-//        Log.d("tempSpy", tempSpy == null ? "null": tempSpy.name);
-//        return realm.copyFromRealm(tempSpy);
-//    }
     @Override
     public SpyDTO spyForId(int spyId){
         Spy spy = dataLayer.spyForId(spyId);
