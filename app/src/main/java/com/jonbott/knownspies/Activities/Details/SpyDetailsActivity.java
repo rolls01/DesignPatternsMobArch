@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.jonbott.knownspies.Activities.SecretDetails.SecretDetailsActivity;
+import com.jonbott.knownspies.Coordinators.RootCoordinator;
 import com.jonbott.knownspies.Dependencies.DependencyRegistry;
 import com.jonbott.knownspies.Helpers.Constants;
 import com.jonbott.knownspies.R;
@@ -19,10 +20,11 @@ public class SpyDetailsActivity extends AppCompatActivity {
 //    private int spyId = -1;
 
     private SpyDetailsPresenter spyDetailsPresenter;
+    private RootCoordinator rootCoordinator;
     private ImageView profileImage;
-    private TextView  nameTextView;
-    private TextView  ageTextView;
-    private TextView  genderTextView;
+    private TextView nameTextView;
+    private TextView ageTextView;
+    private TextView genderTextView;
     private ImageButton calculateButton;
 
     @Override
@@ -43,10 +45,10 @@ public class SpyDetailsActivity extends AppCompatActivity {
     //region UI Methods
 
     private void attachUI() {
-        profileImage    = (ImageView)   findViewById(R.id.details_profile_image);
-        nameTextView    = (TextView)    findViewById(R.id.details_name);
-        ageTextView     = (TextView)    findViewById(R.id.details_age);
-        genderTextView  = (TextView)    findViewById(R.id.details_gender);
+        profileImage = (ImageView) findViewById(R.id.details_profile_image);
+        nameTextView = (TextView) findViewById(R.id.details_name);
+        ageTextView = (TextView) findViewById(R.id.details_age);
+        genderTextView = (TextView) findViewById(R.id.details_gender);
         calculateButton = (ImageButton) findViewById(R.id.calculate_button);
 
         calculateButton.setOnClickListener(v -> gotoSecretDetails());
@@ -56,19 +58,14 @@ public class SpyDetailsActivity extends AppCompatActivity {
     //region navigation
 
     private void gotoSecretDetails() {
-    if(spyDetailsPresenter == null) return;
+        if (spyDetailsPresenter == null) return;
 
-        Bundle bundle = new Bundle();
-        bundle.putInt(Constants.spyIdKey, spyDetailsPresenter.getSpyId());
-
-        Intent intent = new Intent(SpyDetailsActivity.this, SecretDetailsActivity.class);
-        intent.putExtras(bundle);
-
-        startActivity(intent);
+        rootCoordinator.handleSecretButtonTapped(this, spyDetailsPresenter.getSpyId());
     }
 
-    public void configureWith(SpyDetailsPresenter presenter) {
+    public void configureWith(SpyDetailsPresenter presenter, RootCoordinator rootCoordinator) {
         this.spyDetailsPresenter = presenter;
+        this.rootCoordinator = rootCoordinator;
         ageTextView.setText(spyDetailsPresenter.getAge());
         profileImage.setImageResource(spyDetailsPresenter.getImageId());
         nameTextView.setText(spyDetailsPresenter.getName());

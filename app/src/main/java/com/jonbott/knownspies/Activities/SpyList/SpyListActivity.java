@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.jonbott.knownspies.Activities.Details.SpyDetailsActivity;
+import com.jonbott.knownspies.Coordinators.RootCoordinator;
 import com.jonbott.knownspies.Dependencies.DependencyRegistry;
 import com.jonbott.knownspies.Helpers.Constants;
 import com.jonbott.knownspies.Helpers.Threading;
@@ -38,6 +39,7 @@ public class SpyListActivity extends AppCompatActivity {
     private static final String TAG = "SpyListActivity";
 
     private SpyListPresenter spyListPresenter;
+    private RootCoordinator rootCoordinator;
     private List<SpyDTO> spies = new ArrayList<>();
     private RecyclerView recyclerView;
 
@@ -53,8 +55,9 @@ public class SpyListActivity extends AppCompatActivity {
     }
 
     //region InjectionMethods
-    public void configureWith(SpyListPresenter spyListPresenter) {
+    public void configureWith(SpyListPresenter spyListPresenter, RootCoordinator rootCoordinator) {
         this.spyListPresenter = spyListPresenter;
+        this.rootCoordinator = rootCoordinator;
         loadData();
     }
     //endregion
@@ -140,13 +143,8 @@ public class SpyListActivity extends AppCompatActivity {
 
     private void gotoSpyDetails(int spyId) {
 
-        Bundle bundle = new Bundle();
-        bundle.putInt(Constants.spyIdKey, spyId);
+        rootCoordinator.handleSpyCellTapped(this, spyId);
 
-        Intent intent = new Intent(SpyListActivity.this, SpyDetailsActivity.class);
-        intent.putExtras(bundle);
-
-        startActivity(intent);
     }
 
     //endregion
