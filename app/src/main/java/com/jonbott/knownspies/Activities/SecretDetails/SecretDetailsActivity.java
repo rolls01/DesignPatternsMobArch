@@ -9,12 +9,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.jonbott.knownspies.Activities.SpyList.SpyListActivity;
-import com.jonbott.knownspies.Helpers.Constants;
-import com.jonbott.knownspies.Helpers.Threading;
-import com.jonbott.knownspies.ModelLayer.Database.Realm.Spy;
+import com.jonbott.knownspies.Dependencies.DependencyRegistry;
 import com.jonbott.knownspies.R;
-
-import io.realm.Realm;
 
 public class SecretDetailsActivity extends AppCompatActivity {
 
@@ -29,14 +25,17 @@ public class SecretDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_secret_details);
 
         attachUI();
-        parseBundle();
+//        parseBundle();
+
+        Bundle bundle = getIntent().getExtras();
+        DependencyRegistry.shared.inject(this, bundle);
     }
 
-    private void configure(SecretDetailsPresenter secretDetailPresenter){
+    public void configureWith(SecretDetailsPresenter secretDetailsPresenter){
         this.secretDetailsPresenter = secretDetailsPresenter;
-        secretDetailPresenter.crackPassword(password ->{
+        this.secretDetailsPresenter.crackPassword(password ->{
             progressBar.setVisibility(View.GONE);
-            crackingLabel.setText(secretDetailPresenter.password);
+            crackingLabel.setText(secretDetailsPresenter.getPassword());
         });
     }
 
@@ -48,23 +47,6 @@ public class SecretDetailsActivity extends AppCompatActivity {
         finishedButton = (Button)      findViewById(R.id.secret_finished_button);
 
         finishedButton.setOnClickListener(v -> finishedClicked() );
-    }
-
-    //endregion
-
-    //region Dependency Method
-    private void setupPresenterFor(int spyId){
-        configure(new SecretDetailsPresenter(spyId));
-    }
-    //endregion
-
-    private void parseBundle() {
-        Bundle b = getIntent().getExtras();
-
-        if(b != null) {
-            int spyId = b.getInt(Constants.spyIdKey);
-            setupPresenterFor(spyId);
-        }
     }
 
     //endregion

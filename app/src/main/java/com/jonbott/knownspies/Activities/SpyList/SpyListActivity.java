@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.jonbott.knownspies.Activities.Details.SpyDetailsActivity;
+import com.jonbott.knownspies.Dependencies.DependencyRegistry;
 import com.jonbott.knownspies.Helpers.Constants;
 import com.jonbott.knownspies.Helpers.Threading;
 import com.jonbott.knownspies.ModelLayer.DTOs.SpyDTO;
@@ -36,7 +37,7 @@ public class SpyListActivity extends AppCompatActivity {
 
     private static final String TAG = "SpyListActivity";
 
-    private SpyListPresenter spyListPresenter = new SpyListPresenter();
+    private SpyListPresenter spyListPresenter;
     private List<SpyDTO> spies = new ArrayList<>();
     private RecyclerView recyclerView;
 
@@ -47,10 +48,20 @@ public class SpyListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_spy_list);
 
         attachUI();
-        loadData();
+
+        DependencyRegistry.shared.inject(this);
     }
 
+    //region InjectionMethods
+    public void configureWith(SpyListPresenter spyListPresenter) {
+        this.spyListPresenter = spyListPresenter;
+        loadData();
+    }
+    //endregion
+
+
     //region Helper Methods
+
     private void attachUI() {
         LinearLayoutManager manager = new LinearLayoutManager(this);
 
@@ -60,39 +71,43 @@ public class SpyListActivity extends AppCompatActivity {
 
         initializeListView();
     }
-
+    //}
+    //    }
+    //        e.printStackTrace();
+    //    } catch (Exception e) {
+    //        initializeData();
+    //        initializeListView();
+    //        try {
 //    private void setupData() {
-//        try {
-//        initializeListView();
-//        initializeData();
-//    } catch (Exception e) {
-//        e.printStackTrace();
-//    }
-//}
+
     //endregion
 
     //region Data Process specific to SpyListActivity
 
 
     private void loadData() {
+        spyListPresenter.loadData(this::spiesUpdated, this::onDataReceived);
+
+    }
+        private void spiesUpdated(List<SpyDTO> spiesDTO) {
         spyListPresenter.loadData( spies -> {
             this.spies = spies;
             SpyViewAdapter adapter = (SpyViewAdapter) recyclerView.getAdapter();
             adapter.setSpies(this.spies);
             adapter.notifyDataSetChanged();
-        }, this::notifyDataReceived);
+        }, this::onDataReceived);
     }
 
-
+    //        });
+    //            persistJson(json, () -> loadSpiesFromLocal());
+    //            notifyDataReceived(Source.network);
+    //        loadJson(json -> {
+    //
+    //        notifyDataReceived(Source.local);
+    //        loadSpiesFromLocal();
+    //
 //    private void initializeData() throws Exception {
-//
-//        loadSpiesFromLocal();
-//        notifyDataReceived(Source.local);
-//
-//        loadJson(json -> {
-//            notifyDataReceived(Source.network);
-//            persistJson(json, () -> loadSpiesFromLocal());
-//        });
+
 //    }
 
     //endregion
@@ -104,7 +119,7 @@ public class SpyListActivity extends AppCompatActivity {
         gotoSpyDetails(spy.id);
     }
 
-    private void notifyDataReceived(Source source) {
+    private void onDataReceived(Source source) {
         String message = String.format("Data from %s", source.name());
         Toast.makeText(SpyListActivity.this, message, Toast.LENGTH_SHORT).show();
     }

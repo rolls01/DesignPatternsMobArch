@@ -8,12 +8,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.jonbott.knownspies.Activities.SecretDetails.SecretDetailsActivity;
+import com.jonbott.knownspies.Dependencies.DependencyRegistry;
 import com.jonbott.knownspies.Helpers.Constants;
-import com.jonbott.knownspies.Helpers.Helper;
-import com.jonbott.knownspies.ModelLayer.Database.Realm.Spy;
 import com.jonbott.knownspies.R;
-
-import io.realm.Realm;
 
 public class SpyDetailsActivity extends AppCompatActivity {
 
@@ -33,13 +30,15 @@ public class SpyDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_spy_details);
         attachUI();
-        parseBundle();
+
+        Bundle bundle = getIntent().getExtras();
+        DependencyRegistry.shared.inject(this, bundle);
     }
 
-    public void configure(SpyDetailsPresenter spyDetailsPresenter){
-        this.spyDetailsPresenter = spyDetailsPresenter;
-        this.spyDetailsPresenter.configureWithContext(this);
-    }
+//    public void configure(SpyDetailsPresenter spyDetailsPresenter){
+//        this.spyDetailsPresenter = spyDetailsPresenter;
+//        this.spyDetailsPresenter.configureWithContext(this);
+//    }
 
     //region UI Methods
 
@@ -54,46 +53,26 @@ public class SpyDetailsActivity extends AppCompatActivity {
     }
 
 
-    private void configureUIWith(SpyDetailsPresenter spyDetailsPresenter) {
-        ageTextView.setText(spyDetailsPresenter.age);
-        profileImage.setImageResource(spyDetailsPresenter.imageId);
-        nameTextView.setText(spyDetailsPresenter.name);
-        genderTextView.setText(spyDetailsPresenter.gender);
-
-    }
-
-    //endregion
-
-    //region Dependency Methods
-    private void getPresenterFor(int spyId){
-        configure(new SpyDetailsPresenter(spyId));
-    }
-
-    //endregion
-
-    //region navigation
-    private void parseBundle() {
-        Bundle b = getIntent().getExtras();
-
-        if(b != null){
-            int spyId = b.getInt(Constants.spyIdKey);
-            getPresenterFor(spyId);
-        }
-    }
-
-    //endregion
-
-
     //region navigation
 
     private void gotoSecretDetails() {
+    if(spyDetailsPresenter == null) return;
+
         Bundle bundle = new Bundle();
-        bundle.putInt(Constants.spyIdKey, spyDetailsPresenter.spyId);
+        bundle.putInt(Constants.spyIdKey, spyDetailsPresenter.getSpyId());
 
         Intent intent = new Intent(SpyDetailsActivity.this, SecretDetailsActivity.class);
         intent.putExtras(bundle);
 
         startActivity(intent);
+    }
+
+    public void configureWith(SpyDetailsPresenter presenter) {
+        this.spyDetailsPresenter = presenter;
+        ageTextView.setText(spyDetailsPresenter.getAge());
+        profileImage.setImageResource(spyDetailsPresenter.getImageId());
+        nameTextView.setText(spyDetailsPresenter.getName());
+        genderTextView.setText(spyDetailsPresenter.getGender());
     }
 
     //endregion
