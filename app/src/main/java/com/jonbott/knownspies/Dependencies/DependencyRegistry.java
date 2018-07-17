@@ -12,6 +12,7 @@ import com.jonbott.knownspies.Activities.SecretDetails.SecretDetailsPresenterImp
 import com.jonbott.knownspies.Activities.SpyList.SpyListActivity;
 import com.jonbott.knownspies.Activities.SpyList.SpyListPresenter;
 import com.jonbott.knownspies.Activities.SpyList.SpyListPresenterImpl;
+import com.jonbott.knownspies.Coordinators.RootCoordinator;
 import com.jonbott.knownspies.Helpers.Constants;
 import com.jonbott.knownspies.ModelLayer.Database.DataLayer;
 import com.jonbott.knownspies.ModelLayer.Database.DataLayerImpl;
@@ -38,6 +39,10 @@ public class DependencyRegistry {
     public Realm newRealmInstanceOnCurrentThread(){
         return Realm.getInstance(realm.getConfiguration());
     }
+    //endregion
+
+    //region Coordinators
+    public RootCoordinator rootCoordinator = new RootCoordinator();
     //endregion
 
     //region Singletons
@@ -68,7 +73,7 @@ public class DependencyRegistry {
         int spyId = idFromBundle(bundle);
 
         SpyDetailsPresenter presenter = new SpyDetailsPresenterImpl(spyId, activity, modelLayer);
-        activity.configureWith(presenter);
+        activity.configureWith(presenter, rootCoordinator);
 
     }
 
@@ -76,13 +81,13 @@ public class DependencyRegistry {
         int spyId = idFromBundle(bundle);
 
         SecretDetailsPresenter secretDetailsPresenter = new SecretDetailsPresenterImpl(spyId, modelLayer);
-        activity.configureWith(secretDetailsPresenter);
+        activity.configureWith(secretDetailsPresenter, rootCoordinator);
     }
 
     public void inject(SpyListActivity activity) throws NoSuchElementException{
 //        int spyId = idFromBundle(bundle);
         SpyListPresenter spyListPresenter = new SpyListPresenterImpl(modelLayer);
-        activity.configureWith(spyListPresenter);
+        activity.configureWith(spyListPresenter, rootCoordinator);
 
     }
     //endregion
